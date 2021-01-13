@@ -1,0 +1,29 @@
+{
+  "name": "Bulk Whatsapp Messages",
+  "version": "1.0",
+  "description": "_MSG_DESCRIPTION",
+  "author": "StartupTalky",
+  "manifest_version": 2,
+  "background": {
+    "page": "background/index.js",
+    "persistent": false
+  },
+  "browser_action": {
+    "default_icon": "assets/images/icon32.png",
+    "default_title": "Bulk whatsapp messages",
+    "default_popup": "pages/home/popup.html"
+  },
+  "icons": {
+    "16": "assets/images/icon16.png",
+    "32": "assets/images/icon32.png",
+    "128": "assets/images/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["contentScripts/index.js"]
+    }
+  ],
+  "permissions": ["storage", "tabs"],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}
