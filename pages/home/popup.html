@@ -10,12 +10,12 @@
     <form id="form">
       <input id="numbers" type="text" name="numbers" placeholder="Enter the numbers" >
     
-<select name="countryCode" id="country_code_dropdown" value="44" >
+<select name="countryCode" id="country_code_dropdown">
   <!-- Countries often selected by users can be moved to the top of the list. -->
   <!-- Countries known to be subject to general US embargo are commented out by default. -->
   <!-- The data-countryCode attribute is populated with ISO country code, and value is int'l calling code. -->
-  <option disabled="disabled" value="Select Country Code" >Select Country Code</option>
-  <option data-countryCode="US" value="1" selected>USA (+1)</option>
+  <option value="" selected disabled hidden >Select Country Code</option>
+  <option data-countryCode="US" value="1">USA (+1)</option>
   <option data-countryCode="GB" value="44">UK (+44)</option>
   <option data-countryCode="DZ" value="213">Algeria (+213)</option>
   <option data-countryCode="AD" value="376">Andorra (+376)</option>

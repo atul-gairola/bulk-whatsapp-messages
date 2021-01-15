@@ -10,21 +10,24 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "send_message") {
     console.log(message.message);
-    await sendMessage(message.message);
+    console.log(message.numbers);
+    const numberWithCountryCode = message.countryCode + message.numbers;
+    console.log(numberWithCountryCode);
+    await sendMessage(message.message, numberWithCountryCode);
     await clickSendButton();
   }
 });
 
-async function sendMessage(msg) {
+async function sendMessage(msg, number) {
   return new Promise((resolve, reject) => {
     const bulkWhatsappLink = $id("blkwhattsapplink");
     if (bulkWhatsappLink) {
       bulkWhatsappLink.setAttribute(
         "href",
-        `https://wa.me/919958472522?text=${msg}`
+        `https://wa.me/${number}?text=${msg}`
       );
     } else {
-      const spanHtml = `<a href="https://wa.me/919958472522?text=${msg}" id= "blkwhattsapplink"></a>`;
+      const spanHtml = `<a href="https://wa.me/${number}?text=${msg}" id= "blkwhattsapplink"></a>`;
       const spans = $$("#app .app-wrapper-web span");
       spans[4].innerHTML = spanHtml;
     }
