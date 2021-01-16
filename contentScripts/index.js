@@ -12,13 +12,21 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
     if (message.numbers.length !== 0) {
       for (const number of message.numbers) {
         const numberWithCountryCode = message.countryCode + number;
-        console.log(numberWithCountryCode);
         await sendMessage(message.message, numberWithCountryCode);
         await clickSendButton();
+        if (message.randomDelay) {
+          await addDelay();
+        }
       }
     }
   }
 });
+
+const addDelay = async () => {
+  const randomDelayTime = Math.floor(generateRandomNumber(2, 5) * 1000);
+  console.log("Delay of : ", randomDelayTime);
+  await sleep(randomDelayTime);
+};
 
 async function sendMessage(msg, number) {
   return new Promise((resolve, reject) => {
@@ -56,4 +64,9 @@ async function waitFor(DOMQuery) {
     }, 500);
   }
   return;
+}
+
+// helper function returns random numbers b/w 2 given numbers
+function generateRandomNumber(min, max) {
+  return Math.random() * (max - min) + min;
 }

@@ -282,6 +282,17 @@
           placeholder="Enter the numbers"
         />
       </div>
+      <p>or</p>
+      <div>
+        <input
+          type="checkbox"
+          id="select_numbers_from_whatsapp"
+          name="selectNumbersFromWhatsapp"
+        />
+        <label for="selectNumbersFromWhatsapp"
+          >Select numbers from whatsapp</label
+        ><br />
+      </div>
       <textarea
         name="message"
         id="message"
@@ -289,6 +300,12 @@
         placeholder="Write the message"
         rows="10"
       ></textarea>
+      <div>
+        <input type="checkbox" id="random_delay" name="randomDelay" />
+        <label for="randomDelay"
+          >Add random delay between each message (Delay b/w 2-5s)</label
+        ><br />
+      </div>
       <button type="submit" id="submit">Send Messages</button>
       <button type="button" id="reset">Reset</button>
     </form>

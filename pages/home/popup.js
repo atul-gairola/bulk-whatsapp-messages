@@ -17,12 +17,14 @@ const submit_button = $id("submit");
 const country_code_dropdown = $id("country_code_dropdown");
 const input_container = $(".input_container");
 const reset_button = $id("reset");
+const random_delay = $id("random_delay");
 
 // state for form data
 const form_data = {
   numbers: [],
   message: "",
   countryCode: "",
+  randomDelay: false,
 };
 
 // first function which runs whenever the popup opens
@@ -31,6 +33,7 @@ function onLoad() {
   setLocalState("message");
   setLocalState("numbers");
   setLocalState("countryCode");
+  setLocalState("randomDelay");
 }
 
 // sets the local state as per the chrome storage
@@ -53,8 +56,11 @@ const setInitialDom = (key, value) => {
       country_code_dropdown.value = value;
       break;
     case "numbers":
-      console.log(value);
       value.forEach((cur) => addNumberTag(cur));
+      break;
+    case "randomDelay":
+      console.log(value);
+      random_delay.checked = value;
       break;
   }
 };
@@ -63,10 +69,18 @@ onLoad();
 
 const handleChange = (e) => {
   const { name, value } = e.target;
-  // set local state
-  form_data[name] = String(value);
-  // update data in chrome storage
-  chrome.storage.local.set({ [name]: value });
+  if (typeof e.target.checked !== "undefined") {
+    // set local state
+    form_data[name] = e.target.checked;
+    // update data in chrome storage
+    chrome.storage.local.set({ [name]: e.target.checked });
+  } else {
+    // set local state
+    form_data[name] = String(value);
+    // update data in chrome storage
+    chrome.storage.local.set({ [name]: value });
+  }
+  console.log(form_data);
 };
 
 // handles the number input keyups
@@ -138,6 +152,7 @@ const handleSubmit = (e) => {
         message: form_data.message,
         numbers: form_data.numbers,
         countryCode: form_data.countryCode,
+        randomDelay: form_data.randomDelay,
       });
     }
   );
@@ -160,3 +175,5 @@ submit_button.addEventListener("click", handleSubmit);
 country_code_dropdown.addEventListener("change", handleChange);
 
 reset_button.addEventListener("click", handleReset);
+
+random_delay.addEventListener("change", handleChange);
