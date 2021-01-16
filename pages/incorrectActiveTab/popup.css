@@ -1,3 +1,37 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400&display=swap");
+
 body {
   width: 400px;
+  display: grid;
+  height: 500px;
+  justify-items: center;
+  align-items: center;
+  text-align: center;
+  font-family: "Open Sans", sans-serif;
+}
+
+*:focus {
+  outline: none;
+}
+
+#redirect {
+  padding: 10px 33px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  height: 50px;
+  border-radius: 50px;
+  border: 1px solid #25d366;
+  background: #25d366;
+  color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.2) 10px 10px 14px 1px;
+}
+
+#redirect:hover {
+  transition: 0.5s;
+  box-shadow: rgba(0, 0, 0, 0.2) 5px 5px 14px 1px;
+}
+
+#redirect:active {
+  transition: 0.2s;
+  box-shadow: none;
 }
