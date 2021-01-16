@@ -9,6 +9,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // listens for the message from popup
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "send_message") {
+    if (!!message.selectNumbersFromWhatsapp) {
+      await sendMessage(message.message, "");
+      return;
+    }
     if (message.numbers.length !== 0) {
       for (const number of message.numbers) {
         const numberWithCountryCode = message.countryCode + number;

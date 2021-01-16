@@ -18,6 +18,7 @@ const country_code_dropdown = $id("country_code_dropdown");
 const input_container = $(".input_container");
 const reset_button = $id("reset");
 const random_delay = $id("random_delay");
+const select_numbers_from_whatsapp = $id("select_numbers_from_whatsapp");
 
 // state for form data
 const form_data = {
@@ -25,6 +26,7 @@ const form_data = {
   message: "",
   countryCode: "",
   randomDelay: false,
+  selectNumbersFromWhatsapp: false,
 };
 
 // first function which runs whenever the popup opens
@@ -34,6 +36,7 @@ function onLoad() {
   setLocalState("numbers");
   setLocalState("countryCode");
   setLocalState("randomDelay");
+  setLocalState("selectNumbersFromWhatsapp");
 }
 
 // sets the local state as per the chrome storage
@@ -59,8 +62,11 @@ const setInitialDom = (key, value) => {
       value.forEach((cur) => addNumberTag(cur));
       break;
     case "randomDelay":
-      console.log(value);
       random_delay.checked = value;
+      break;
+    case "selectNumbersFromWhatsapp":
+      select_numbers_from_whatsapp.checked = value;
+      switchInputDisability(value);
       break;
   }
 };
@@ -74,6 +80,10 @@ const handleChange = (e) => {
     form_data[name] = e.target.checked;
     // update data in chrome storage
     chrome.storage.local.set({ [name]: e.target.checked });
+
+    if (name === "selectNumbersFromWhatsapp") {
+      switchInputDisability(!!e.target.checked);
+    }
   } else {
     // set local state
     form_data[name] = String(value);
@@ -81,6 +91,10 @@ const handleChange = (e) => {
     chrome.storage.local.set({ [name]: value });
   }
   console.log(form_data);
+};
+
+const switchInputDisability = (isDisabled) => {
+  numbers_input.disabled = isDisabled;
 };
 
 // handles the number input keyups
@@ -153,6 +167,7 @@ const handleSubmit = (e) => {
         numbers: form_data.numbers,
         countryCode: form_data.countryCode,
         randomDelay: form_data.randomDelay,
+        selectNumbersFromWhatsapp: form_data.selectNumbersFromWhatsapp,
       });
     }
   );
@@ -177,3 +192,5 @@ country_code_dropdown.addEventListener("change", handleChange);
 reset_button.addEventListener("click", handleReset);
 
 random_delay.addEventListener("change", handleChange);
+
+select_numbers_from_whatsapp.addEventListener("change", handleChange);
