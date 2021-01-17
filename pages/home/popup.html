@@ -8,24 +8,30 @@
   </head>
   <body>
     <form id="form">
-      <div class="checkbox-container">
-        <input
-          type="radio"
-          name="numberInputType"
-          id="select_numbers_from_whatsapp"
-          value="whatsappContacts"
-        />
-        <label>Select numbers from contacts</label>
+      <div class="title_container">
+        <h2>Bulk Whatsapp Messages</h2>
       </div>
-      <!-- <span class="or">OR</span> -->
-      <div class="checkbox-container">
-        <input
-          type="radio"
-          name="numberInputType"
-          id="enter_numbers_manually"
-          value="manually"
-        />
-        <label>Enter numbers manually</label>
+      <div class="radio_container">
+        <h3>How would you like to enter the numbers ?</h3>
+        <div class="checkbox-container">
+          <input
+            type="radio"
+            name="numberInputType"
+            id="select_numbers_from_whatsapp"
+            value="whatsappContacts"
+          />
+          <label class="radio_label">Select numbers from contacts</label>
+        </div>
+        <!-- <span class="or">OR</span> -->
+        <div class="checkbox-container">
+          <input
+            type="radio"
+            name="numberInputType"
+            id="enter_numbers_manually"
+            value="manually"
+          />
+          <label class="radio_label">Enter numbers manually</label>
+        </div>
       </div>
       <div id="manuall-container" class="hide">
         <p class="input-label">Select country code</p>
@@ -321,7 +327,10 @@
           />
         </div>
       </div>
-      <p class="input-label">Write your message</p>
+      <div class="textbox_label_container">
+        <h3 style="margin-bottom: 0">Write your message</h3>
+        <p>*<b>bold</b>* _<i>italic</i>_ ~<strike>strike</strike>~</p>
+      </div>
       <!-- <p class="subtitle">Format types : *bold*, _italic_ , ~strike~</p> -->
       <textarea
         name="message"
