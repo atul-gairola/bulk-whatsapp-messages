@@ -11,7 +11,7 @@
       <div class="title_container">
         <h2>Bulk Whatsapp Messages</h2>
       </div>
-      <div class="error_container hide" id="error_container" >
+      <div class="error_container hide" id="error_container">
         <p>Error Container</p>
       </div>
       <div class="radio_container">
@@ -35,8 +35,17 @@
           />
           <label class="radio_label">Enter numbers manually</label>
         </div>
+        <div class="checkbox-container">
+          <input
+            type="radio"
+            name="numberInputType"
+            id="add_csv"
+            value="csv"
+          />
+          <label class="radio_label">Upload CSV</label>
+        </div>
       </div>
-      <div id="manuall-container" class="hide">
+      <div id="manuall-container" class="option_number_container hide">
         <p class="input-label">Select country code</p>
         <select name="countryCode" id="country_code_dropdown">
           <!-- Countries often selected by users can be moved to the top of the list. -->
@@ -329,6 +338,14 @@
             placeholder="Enter phone numbers"
           />
         </div>
+      </div>
+      <div id="csv-container" class="option_number_container hide">
+        <label for="csv"
+          >Add a CSV file with a column named "Numbers" <br />
+          (the numbers must start with their country code)</label
+        >
+        <input type="file" accept=".csv" name="csv" id="csv_input" />
+        <p id="total_numbers_csv" class="hide">Total numbers:</p>
       </div>
       <div class="textbox_label_container">
         <h3 style="margin-bottom: 0">Write your message</h3>

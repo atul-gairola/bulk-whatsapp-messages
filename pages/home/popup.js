@@ -21,7 +21,10 @@ const reset_button = $id("reset");
 const random_delay = $id("random_delay");
 const number_input_types = [...$name("numberInputType")];
 const manuall_container = $id("manuall-container");
+const csv_container = $id("csv-container");
 const error_container = $id("error_container");
+const csv_input = $id("csv_input");
+const total_numbers_csv = $id("total_numbers_csv");
 
 // state for form data
 const form_data = {
@@ -30,6 +33,7 @@ const form_data = {
   countryCode: "",
   randomDelay: false,
   numberInputType: "",
+  numbersViaCSV: [],
 };
 
 // first function which runs whenever the popup opens
@@ -40,6 +44,7 @@ function onLoad() {
   setLocalState("countryCode");
   setLocalState("randomDelay");
   setLocalState("numberInputType");
+  // setLocalState("numbersViaCSV");
 }
 
 // sets the local state as per the chrome storage
@@ -76,6 +81,11 @@ const setInitialDom = (key, value) => {
         manuall_container.classList.remove("hide");
       } else {
         manuall_container.classList.add("hide");
+      }
+      if (value === "csv") {
+        csv_container.classList.remove("hide");
+      } else {
+        csv_container.classList.add("hide");
       }
       break;
   }
@@ -169,6 +179,12 @@ const handleRadio = (e) => {
   } else {
     manuall_container.classList.add("hide");
   }
+
+  if (e.target.value === "csv") {
+    csv_container.classList.remove("hide");
+  } else {
+    csv_container.classList.add("hide");
+  }
 };
 
 const addError = (msg) => {
@@ -178,6 +194,35 @@ const addError = (msg) => {
 
 const removeError = () => {
   error_container.classList.add("hide");
+};
+
+const handleFileInput = (e) => {
+  const fr = new FileReader();
+  fr.onload = () => {
+    // console.log(fr.result.split("\n"));
+    const rows = fr.result.split("\n");
+    const coulmnHeaders = rows[0].split(",");
+    const columnNumber = coulmnHeaders.indexOf("Numbers");
+    console.log("Column: ", columnNumber);
+
+    total_numbers_csv.classList.remove("hide");
+
+    for (let i = 1; i < rows.length; i++) {
+      const cells = rows[i].split(",");
+      let number = cells[columnNumber];
+      number = number.replace("+", "");
+      number = number.replace(" ", "");
+      // save to local state
+      console.log(number);
+      if (number !== "" && number.match("[0-9]+")) {
+        form_data.numbersViaCSV.push(number);
+      }
+      // update data in chrom storage
+      // chrome.storage.local.set({ numbersViaCSV: form_data.numbersViaCSV });
+    }
+    total_numbers_csv.innerText = `Total Numbers: ${form_data.numbersViaCSV.length}`;
+  };
+  fr.readAsText(e.target.files[0]);
 };
 
 const handleSubmit = (e) => {
@@ -228,6 +273,7 @@ const handleSubmit = (e) => {
         countryCode: form_data.countryCode,
         randomDelay: form_data.randomDelay,
         numberInputType: form_data.numberInputType,
+        numbersViaCSV: form_data.numbersViaCSV,
       });
     }
   );
@@ -256,3 +302,5 @@ random_delay.addEventListener("change", handleChange);
 number_input_types.forEach((cur) =>
   cur.addEventListener("change", handleRadio)
 );
+
+csv_input.addEventListener("change", handleFileInput);

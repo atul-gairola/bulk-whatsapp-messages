@@ -117,7 +117,7 @@ label[for="randomDelay"] {
   font-size: 0.9rem;
 }
 
-#manuall-container {
+.option_number_container {
   background: #d3d3d3;
   padding: 15px 20px 20px 20px;
   border-radius: 5px;
@@ -184,7 +184,7 @@ button:focus {
   box-shadow: none;
 }
 
-.error_container{
+.error_container {
   border: 1px solid red;
   border-radius: 5px;
   /* text-align: center; */
