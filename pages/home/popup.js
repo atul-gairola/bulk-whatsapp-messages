@@ -21,6 +21,7 @@ const reset_button = $id("reset");
 const random_delay = $id("random_delay");
 const number_input_types = [...$name("numberInputType")];
 const manuall_container = $id("manuall-container");
+const error_container = $id("error_container");
 
 // state for form data
 const form_data = {
@@ -170,8 +171,49 @@ const handleRadio = (e) => {
   }
 };
 
+const addError = (msg) => {
+  error_container.classList.remove("hide");
+  error_container.querySelector("p").innerText = msg;
+};
+
+const removeError = () => {
+  error_container.classList.add("hide");
+};
+
 const handleSubmit = (e) => {
   e.preventDefault();
+
+  // validation
+  if (form_data.numberInputType === "") {
+    addError("Please select a number input type");
+  }
+  if (form_data.numberInputType === "manually") {
+    if (form_data.countryCode === "") {
+      addError("Please select a country code");
+      country_code_dropdown.classList.add("error_input");
+      return;
+    } else {
+      country_code_dropdown.classList.remove("error_input");
+    }
+    if (form_data.numbers.length === 0) {
+      addError("Please manually enter phone numbers seperated by commmas (,)");
+      input_container.classList.add("error_input");
+      return;
+    } else {
+      input_container.classList.remove("error_input");
+    }
+  }
+  if (form_data.message === "") {
+    addError("Your message is empty");
+    message_input.classList.add("error_input");
+    return;
+  } else {
+    message_input.classList.remove("error_input");
+  }
+
+  // remove all previous errors if none found
+  removeError();
+
   chrome.tabs.query(
     {
       active: true,

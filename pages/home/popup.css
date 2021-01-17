@@ -92,7 +92,7 @@ input[type="checkbox"] {
   font-size: 0.9rem;
 }
 
-.radio_container{
+.radio_container {
   margin-bottom: 40px;
 }
 
@@ -105,7 +105,7 @@ input[type="checkbox"] {
   margin-bottom: 10px;
 }
 
-h3{
+h3 {
   margin-bottom: 20px;
 }
 
@@ -118,11 +118,11 @@ label[for="randomDelay"] {
 }
 
 #manuall-container {
-  background: #d3d3d3 ;
+  background: #d3d3d3;
   padding: 15px 20px 20px 20px;
   border-radius: 5px;
   margin-bottom: 20px;
-  border: 1px solid #919191 ;
+  border: 1px solid #919191;
 }
 
 #message {
@@ -132,14 +132,14 @@ label[for="randomDelay"] {
   margin-bottom: 5px;
 }
 
-.textbox_label_container{
+.textbox_label_container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
   margin-bottom: 15px;
 }
 
-.textbox_label_container p{
+.textbox_label_container p {
   justify-self: end;
 }
 
@@ -161,7 +161,7 @@ label[for="randomDelay"] {
   transition: 0.3s;
 }
 
-#submit:hover{
+#submit:hover {
   box-shadow: rgba(0, 0, 0, 0.2) 15px 15px 16px 1px;
 }
 
@@ -176,18 +176,30 @@ label[for="randomDelay"] {
   box-shadow: rgba(0, 0, 0, 0.2) 7px 7px 16px 1px;
 }
 
-#reset:hover{
+#reset:hover {
   box-shadow: rgba(0, 0, 0, 0.2) 10px 10px 24px 2px;
-
 }
 
-button:focus{
+button:focus {
   box-shadow: none;
 }
 
+.error_container{
+  border: 1px solid red;
+  border-radius: 5px;
+  /* text-align: center; */
+  color: red;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
 
 .error_input {
   border: 1px solid red;
+}
+.error_text {
+  color: red;
 }
 
 .disabled {
