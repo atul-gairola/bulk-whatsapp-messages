@@ -9,13 +9,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 // mimicking jquery syntax
 $id = document.getElementById.bind(document);
 $ = document.querySelector.bind(document);
+$$ = document.querySelectorAll.bind(document);
 $name = document.getElementsByName.bind(document);
 
 // DOM elements
 const numbers_input = $id("numbers");
 const message_input = $id("message");
 const submit_button = $id("submit");
-const country_code_dropdown = $id("country_code_dropdown");
+const country_code_dropdown = $$(".country_code_dropdown");
 const input_container = $(".input_container");
 const reset_button = $id("reset");
 const random_delay = $id("random_delay");
@@ -64,7 +65,7 @@ const setInitialDom = (key, value) => {
       message_input.value = value;
       break;
     case "countryCode":
-      country_code_dropdown.value = value;
+      [...country_code_dropdown].forEach((cur) => (cur.value = value));
       break;
     case "numbers":
       value.forEach((cur) => addNumberTag(cur));
@@ -235,10 +236,14 @@ const handleSubmit = (e) => {
   if (form_data.numberInputType === "manually") {
     if (form_data.countryCode === "") {
       addError("Please select a country code");
-      country_code_dropdown.classList.add("error_input");
+      [...country_code_dropdown].forEach((cur) =>
+        cur.classList.add("error_input")
+      );
       return;
     } else {
-      country_code_dropdown.classList.remove("error_input");
+      [...country_code_dropdown].forEach((cur) =>
+        cur.classList.remove("error_input")
+      );
     }
     if (form_data.numbers.length === 0) {
       addError("Please manually enter phone numbers seperated by commmas (,)");
@@ -293,7 +298,9 @@ message_input.addEventListener("change", handleChange);
 
 submit_button.addEventListener("click", handleSubmit);
 
-country_code_dropdown.addEventListener("change", handleChange);
+[...country_code_dropdown].forEach((cur) =>
+  cur.addEventListener("change", handleChange)
+);
 
 reset_button.addEventListener("click", handleReset);
 

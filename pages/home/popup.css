@@ -23,7 +23,7 @@ body {
   color: #fff;
 }
 
-#country_code_dropdown {
+.country_code_dropdown {
   width: 150px;
   padding: 10px 8px;
   border-radius: 5px;
@@ -115,6 +115,20 @@ label[for="selectNumbersFromWhatsapp"] {
 
 label[for="randomDelay"] {
   font-size: 0.9rem;
+}
+
+label[for="csv"] {
+  font-size: 0.9rem;
+}
+
+input[type="file"] {
+  margin-top: 15px;
+}
+
+#total_numbers_csv{
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 10px;
 }
 
 .option_number_container {

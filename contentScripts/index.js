@@ -16,6 +16,18 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
       await sendMessage(message.message, "");
       return;
     }
+
+    if (message.numberInputType && message.numberInputType === "csv") {
+      for (number of message.numbersViaCSV) {
+        const numberWithCountryCode = message.countryCode + number;
+        await sendMessage(message.message, numberWithCountryCode);
+        await clickSendButton();
+        if (message.randomDelay) {
+          await addDelay();
+        }
+      }
+    }
+
     if (message.numbers.length !== 0) {
       for (const number of message.numbers) {
         const numberWithCountryCode = message.countryCode + number;
@@ -31,7 +43,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
 
 const addDelay = async () => {
   const randomDelayTime = Math.floor(generateRandomNumber(2, 5) * 1000);
-  console.log("Delay of : ", randomDelayTime);
+  // console.log("Delay of : ", randomDelayTime);
   await sleep(randomDelayTime);
 };
 
