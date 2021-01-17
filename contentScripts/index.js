@@ -9,7 +9,10 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // listens for the message from popup
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "send_message") {
-    if (!!message.selectNumbersFromWhatsapp) {
+    if (
+      message.numberInputType &&
+      message.numberInputType === "whatsappContacts"
+    ) {
       await sendMessage(message.message, "");
       return;
     }

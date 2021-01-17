@@ -9,6 +9,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 // mimicking jquery syntax
 $id = document.getElementById.bind(document);
 $ = document.querySelector.bind(document);
+$name = document.getElementsByName.bind(document);
 
 // DOM elements
 const numbers_input = $id("numbers");
@@ -18,7 +19,8 @@ const country_code_dropdown = $id("country_code_dropdown");
 const input_container = $(".input_container");
 const reset_button = $id("reset");
 const random_delay = $id("random_delay");
-const select_numbers_from_whatsapp = $id("select_numbers_from_whatsapp");
+const number_input_types = [...$name("numberInputType")];
+const manuall_container = $id("manuall-container");
 
 // state for form data
 const form_data = {
@@ -26,7 +28,7 @@ const form_data = {
   message: "",
   countryCode: "",
   randomDelay: false,
-  selectNumbersFromWhatsapp: false,
+  numberInputType: "",
 };
 
 // first function which runs whenever the popup opens
@@ -36,7 +38,7 @@ function onLoad() {
   setLocalState("numbers");
   setLocalState("countryCode");
   setLocalState("randomDelay");
-  setLocalState("selectNumbersFromWhatsapp");
+  setLocalState("numberInputType");
 }
 
 // sets the local state as per the chrome storage
@@ -64,9 +66,16 @@ const setInitialDom = (key, value) => {
     case "randomDelay":
       random_delay.checked = value;
       break;
-    case "selectNumbersFromWhatsapp":
-      select_numbers_from_whatsapp.checked = value;
-      switchInputDisability(value);
+    case "numberInputType":
+      console.log(number_input_types, value);
+      number_input_types.forEach((cur) =>
+        cur.value === value ? (cur.checked = true) : null
+      );
+      if (value === "manually") {
+        manuall_container.classList.remove("hide");
+      } else {
+        manuall_container.classList.add("hide");
+      }
       break;
   }
 };
@@ -80,17 +89,12 @@ const handleChange = (e) => {
     form_data[name] = e.target.checked;
     // update data in chrome storage
     chrome.storage.local.set({ [name]: e.target.checked });
-
-    if (name === "selectNumbersFromWhatsapp") {
-      switchInputDisability(!!e.target.checked);
-    }
   } else {
     // set local state
     form_data[name] = String(value);
     // update data in chrome storage
     chrome.storage.local.set({ [name]: value });
   }
-  console.log(form_data);
 };
 
 const switchInputDisability = (isDisabled) => {
@@ -137,8 +141,6 @@ function addNumberTag(number) {
 // helper function which handles number removal
 const handleTagClose = (e) => {
   e.preventDefault();
-  console.log(e.target.dataset.number);
-  console.log(e.target.parentElement);
   removeNumberFromList(e.target.dataset.number);
   e.target.parentElement.remove();
 };
@@ -151,6 +153,22 @@ function removeNumberFromList(number) {
   // update data in chrome storage
   chrome.storage.local.set({ numbers: form_data.numbers });
 }
+
+const handleRadio = (e) => {
+  console.log(e.target.value);
+  // update local state
+  form_data.numberInputType = e.target.value;
+  // update data in chrome storage
+  chrome.storage.local.set({ numberInputType: e.target.value });
+
+  console.log(form_data);
+
+  if (e.target.value === "manually") {
+    manuall_container.classList.remove("hide");
+  } else {
+    manuall_container.classList.add("hide");
+  }
+};
 
 const handleSubmit = (e) => {
   e.preventDefault();
@@ -167,7 +185,7 @@ const handleSubmit = (e) => {
         numbers: form_data.numbers,
         countryCode: form_data.countryCode,
         randomDelay: form_data.randomDelay,
-        selectNumbersFromWhatsapp: form_data.selectNumbersFromWhatsapp,
+        numberInputType: form_data.numberInputType,
       });
     }
   );
@@ -193,4 +211,6 @@ reset_button.addEventListener("click", handleReset);
 
 random_delay.addEventListener("change", handleChange);
 
-select_numbers_from_whatsapp.addEventListener("change", handleChange);
+number_input_types.forEach((cur) =>
+  cur.addEventListener("change", handleRadio)
+);
