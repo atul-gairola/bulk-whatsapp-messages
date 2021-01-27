@@ -105,6 +105,7 @@ input[type="checkbox"] {
   margin-bottom: 10px;
 }
 
+
 h3 {
   margin-bottom: 20px;
 }
@@ -196,6 +197,37 @@ input[type="file"] {
 
 button:focus {
   box-shadow: none;
+}
+
+.add_csv_button{
+  display: inline-block;
+  padding: 5px 20px;
+  border-radius: 5px;
+  border: none;
+  background: #25d366;
+  color: #fff;
+  cursor: pointer;
+  width: auto;
+}
+
+.button-container-csv{
+  margin-top: 10px;
+}
+
+.fileName{
+  /* color:rgba(37, 211, 102, 1); */
+  font-size: 1rem;
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.removeFile{
+  padding: 5px 20px;
+  color: #fff;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background: rgb(226, 54, 54);
 }
 
 .error_container {

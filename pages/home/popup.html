@@ -336,7 +336,12 @@
       </div>
       <div id="csv-container" class="option_number_container hide">
         <p class="input-label">Select country code</p>
-        <select name="countryCode" class="country_code_dropdown">
+        <select
+          name="countryCode"
+          id="csv_country_codes"
+          class="country_code_dropdown"
+          style="margin-bottom: 5px"
+        >
           <!-- Countries often selected by users can be moved to the top of the list. -->
           <!-- Countries known to be subject to general US embargo are commented out by default. -->
           <!-- The data-countryCode attribute is populated with ISO country code, and value is int'l calling code. -->
@@ -616,10 +621,54 @@
           <option data-countryCode="ZM" value="260">Zambia (+260)</option>
           <option data-countryCode="ZW" value="263">Zimbabwe (+263)</option>
         </select>
+        <div class="checkbox-container county-code-checkbox">
+          <input
+            type="checkbox"
+            id="csv_contains_codes"
+            name="csvContainsCodes"
+          />
+          <label for="csvContainsCodes"
+            >File contains country codes</label
+          >
+        </div>
         <br />
-        <label for="csv">Add a CSV file with a column named "Numbers" </label>
-        <input type="file" accept=".csv" name="csv" id="csv_input" />
+        <label for="csv">Add a CSV file</label>
+        <br />
+        <div class="button-container-csv">
+          <label class="add_csv_button">
+            Select File
+            <input
+              type="file"
+              accept=".xls,.xlsx,.ods,.csv"
+              name="csv"
+              id="csv_input"
+              style="display: none"
+            />
+          </label>
+          <label class="fileName hide">[File name]</label>
+          <button class="removeFile hide">Remove File</button>
+        </div>
         <p id="total_numbers_csv" class="hide">Total numbers:</p>
+
+        <div class="fileSelected hide" >
+           <p>Select numbers from </p>
+           <select name="number_column" id="number_column">
+            <option value="" selected disabled hidden>Columns</option>
+           </select>
+
+           <!-- <div>
+            <div class="checkbox-container">
+              <input
+                type="checkbox"
+                id="contains_csv_codes"
+                name="csvContainsCountryCodes"
+              />
+              <label for="csvContainsCountryCodes"
+                >Use a template</label
+              >
+            </div>
+           </div> -->
+        </div>
       </div>
       <div class="textbox_label_container">
         <h3 style="margin-bottom: 0">Write your message</h3>
@@ -642,6 +691,14 @@
         <button type="button" id="reset">Reset</button>
       </div>
     </form>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/xlsx.full.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.13.5/jszip.js"
+    ></script>
     <script src="./popup.js"></script>
   </body>
 </html>

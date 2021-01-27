@@ -41,6 +41,7 @@ waitForEl();
 // listens for the message from popup
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "send_message") {
+    // send messages through user saved contacts
     if (
       message.numberInputType &&
       message.numberInputType === "whatsappContacts"
@@ -49,9 +50,19 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
       return;
     }
 
-    if (message.numberInputType && message.numberInputType === "csv") {
-      for (number of message.numbersViaCSV) {
-        const numberWithCountryCode = message.countryCode + number;
+    // send messages through csv
+    if (
+      message.numberInputType === "csv" &&
+      message.csv.data.length !== 0 &&
+      typeof message.csv.number_column.number === "number"
+    ) {
+      const { number_column, data } = message.csv;
+      console.log(number_column, data);
+      for (let i = 1; i < data.length; i++) {
+        const numberWithCountryCode = message.csvContainsCodes
+          ? formatNumber(data[i][number_column.number])
+          : message.countryCode + formatNumber(data[i][number_column.number]);
+        // console.log(numberWithCountryCode);
         await sendMessage(message.message, numberWithCountryCode);
         await clickSendButton();
         if (message.randomDelay) {
@@ -59,8 +70,8 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
         }
       }
     }
-
     if (message.numbers.length !== 0) {
+      // message to manual input numbers
       for (const number of message.numbers) {
         const numberWithCountryCode = message.countryCode + number;
         await sendMessage(message.message, numberWithCountryCode);
@@ -72,6 +83,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
     }
   }
 });
+
+const formatNumber = (numStr) => {
+  return numStr.replace(/ /g, "").replace(/\+/g, "").replace(/-/g, "");
+};
 
 const addDelay = async () => {
   const randomDelayTime = Math.floor(generateRandomNumber(2, 5) * 1000);
@@ -139,74 +154,85 @@ const setObserver = () => {
 };
 
 const groupChatConatactsDownload = () => {
-  const headerEl = $id("app")
-    .children[0].querySelector("div")
-    .children[3].querySelector("header");
+  try {
+    const headerEl = $id("app")
+      .children[0].querySelector("div")
+      .children[3].querySelector("header");
 
-  const groupDetailsContainer = headerEl.children[1];
-  const title = groupDetailsContainer.children[0].innerText;
-  const members = groupDetailsContainer.children[1].innerText;
-  const memberss = groupDetailsContainer.children[1].children[0].title;
+    const groupDetailsContainer = headerEl.children[1];
+    const title = groupDetailsContainer.children[0].innerText;
+    const members = groupDetailsContainer.children[1].innerText;
 
-  const isAGroupChat =
-    (members.startsWith("click here") && members.includes("group")) ||
-    members.includes(",");
+    const isAGroupChat =
+      (members.startsWith("click here") && members.includes("group")) ||
+      members.includes(",");
 
-  // only if the chat is of a group, add group download button
-  if (isAGroupChat) {
-    addGroupDownloadButton();
-  }
-
-  function addGroupDownloadButton() {
-    const buttonId = "w_download_contacts_button";
-
-    const isButtonPresent = headerEl.querySelector(`#${buttonId}`);
-
-    if (!isButtonPresent) {
-      const downloadButton = document.createElement("button");
-      downloadButton.innerText = "Get Contacts";
-      downloadButton.id = buttonId;
-      downloadButton.title = "Download group contacts";
-      downloadButton.type = "button";
-      downloadButton.addEventListener("click", handleGroupContactsDownload);
-      headerEl.insertBefore(downloadButton, headerEl.children[2]);
+    // only if the chat is of a group, add group download button
+    if (isAGroupChat) {
+      addGroupDownloadButton();
     }
-  }
 
-  function handleGroupContactsDownload(e) {
-    e.preventDefault();
-    const waitForContacts = () => {
-      // console.log("waiting");
-      if (groupDetailsContainer.children[1].innerText.includes(",")) {
-        // console.log(groupDetailsContainer.children[1].innerText);
-        downloadAsCSV(
-          groupDetailsContainer.children[1].innerText,
-          `${title}.csv`
-        );
-      } else {
-        setTimeout(waitForContacts, 200);
+    function addGroupDownloadButton() {
+      try {
+        const buttonId = "w_download_contacts_button";
+
+        const isButtonPresent = headerEl.querySelector(`#${buttonId}`);
+
+        if (!isButtonPresent) {
+          const downloadButton = document.createElement("button");
+          downloadButton.innerText = "Get Contacts";
+          downloadButton.id = buttonId;
+          downloadButton.title = "Download group contacts";
+          downloadButton.type = "button";
+          downloadButton.addEventListener("click", handleGroupContactsDownload);
+          headerEl.insertBefore(downloadButton, headerEl.children[2]);
+        }
+      } catch (e) {
+        console.log(e);
       }
-    };
+    }
 
-    // downloads the members as CSV
-    const downloadAsCSV = (members, filename) => {
-      let csvFormat = members.replace(/ /g, "");
-      csvFormat = csvFormat.replace(",You", "");
-      csvFormat = csvFormat.replace(/,/g, "\n");
-      const contacts = `Contacts\n${csvFormat}`;
+    function handleGroupContactsDownload(e) {
+      try {
+        e.preventDefault();
+        const waitForContacts = () => {
+          // console.log("waiting");
+          if (groupDetailsContainer.children[1].innerText.includes(",")) {
+            // console.log(groupDetailsContainer.children[1].innerText);
+            downloadAsCSV(
+              groupDetailsContainer.children[1].innerText,
+              `${title}.csv`
+            );
+          } else {
+            setTimeout(waitForContacts, 200);
+          }
+        };
 
-      const blob = new Blob([contacts], { type: "text/csv;charset=utf-8;" });
+        // downloads the members as CSV
+        const downloadAsCSV = (members, filename) => {
+          let csvFormat = members.replace(/ /g, "");
+          csvFormat = csvFormat.replace(",You", "");
+          csvFormat = csvFormat.replace(/,/g, "\n");
+          const contacts = `Contacts\n${csvFormat}`;
 
-      const link = document.createElement("a");
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute("download", filename);
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    };
+          const blob = new Blob([contacts], {
+            type: "text/csv;charset=utf-8;",
+          });
 
-    waitForContacts();
-  }
+          const link = document.createElement("a");
+          const url = URL.createObjectURL(blob);
+          link.setAttribute("href", url);
+          link.setAttribute("download", filename);
+          link.style.visibility = "hidden";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+
+        waitForContacts();
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  } catch (e) {}
 };

@@ -26,6 +26,13 @@ const csv_container = $id("csv-container");
 const error_container = $id("error_container");
 const csv_input = $id("csv_input");
 const total_numbers_csv = $id("total_numbers_csv");
+const number_column = $id("number_column");
+const add_csv_button = $(".add_csv_button");
+const fileNameTag = $(".fileName");
+const removeFileButton = $(".removeFile");
+const fileSelected = $(".fileSelected");
+const csv_contains_codes = $id("csv_contains_codes");
+const csv_country_codes = $id("csv_country_codes");
 
 // state for form data
 const form_data = {
@@ -35,6 +42,15 @@ const form_data = {
   randomDelay: false,
   numberInputType: "",
   numbersViaCSV: [],
+  csv: {
+    name: "",
+    data: [],
+    number_column: {
+      name: "",
+      number: "",
+    },
+  },
+  csvContainsCodes: false,
 };
 
 // first function which runs whenever the popup opens
@@ -45,6 +61,8 @@ function onLoad() {
   setLocalState("countryCode");
   setLocalState("randomDelay");
   setLocalState("numberInputType");
+  setLocalState("csv");
+  setLocalState("csvContainsCodes");
   // setLocalState("numbersViaCSV");
 }
 
@@ -89,6 +107,13 @@ const setInitialDom = (key, value) => {
         csv_container.classList.add("hide");
       }
       break;
+    case "csv":
+      DOMChangesForFile(true);
+      number_column.value = value.number_column.name;
+      break;
+    case "csvContainsCodes":
+      csv_contains_codes.checked = value;
+      csv_country_codes.disabled = value;
   }
 };
 
@@ -107,6 +132,18 @@ const handleChange = (e) => {
     // update data in chrome storage
     chrome.storage.local.set({ [name]: value });
   }
+};
+
+const handleNumberDropdownChange = (e) => {
+  const { value } = e.target;
+  const column = form_data.csv.data[0].indexOf(value);
+  // set local state
+  form_data.csv.number_column = {
+    name: value,
+    number: column,
+  };
+  // update chrome storage
+  chrome.storage.local.set({ csv: form_data.csv });
 };
 
 const switchInputDisability = (isDisabled) => {
@@ -197,33 +234,96 @@ const removeError = () => {
   error_container.classList.add("hide");
 };
 
+const DOMChangesForFile = (isFileSelected) => {
+  if (isFileSelected) {
+    add_csv_button.classList.add("hide");
+    fileNameTag.classList.remove("hide");
+    fileNameTag.innerText = form_data.csv.name;
+    removeFileButton.classList.remove("hide");
+    fileSelected.classList.remove("hide");
+    // create options
+    form_data.csv.data[0].forEach((cur) => {
+      const option = document.createElement("option");
+      option.value = cur;
+      option.innerText = cur;
+      number_column.appendChild(option);
+    });
+  } else {
+    add_csv_button.classList.remove("hide");
+    fileNameTag.classList.add("hide");
+    removeFileButton.classList.add("hide");
+    fileSelected.classList.add("hide");
+  }
+};
+
 const handleFileInput = (e) => {
+  const { name: filename } = e.target.files[0];
+
   const fr = new FileReader();
-  fr.onload = () => {
-    // console.log(fr.result.split("\n"));
-    const rows = fr.result.split("\n");
-    const coulmnHeaders = rows[0].split(",");
-    const columnNumber = coulmnHeaders.indexOf("Numbers");
-    console.log("Column: ", columnNumber);
+  function processExcel(data) {
+    var workbook = XLSX.read(data, {
+      type: "binary",
+    });
 
-    total_numbers_csv.classList.remove("hide");
+    var data = to_array(workbook);
+    return data;
+  }
 
-    for (let i = 1; i < rows.length; i++) {
-      const cells = rows[i].split(",");
-      let number = cells[columnNumber];
-      number = number.replace("+", "");
-      number = number.replace(" ", "");
-      // save to local state
-      console.log(number);
-      if (number !== "" && number.match("[0-9]+")) {
-        form_data.numbersViaCSV.push(number);
-      }
-      // update data in chrom storage
-      // chrome.storage.local.set({ numbersViaCSV: form_data.numbersViaCSV });
-    }
-    total_numbers_csv.innerText = `Total Numbers: ${form_data.numbersViaCSV.length}`;
+  function to_array(workbook) {
+    var result = {};
+    workbook.SheetNames.forEach(function (sheetName) {
+      var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+        header: 1,
+      });
+      if (roa.length) result[sheetName] = roa;
+    });
+    return result[Object.keys(result)[0]];
+  }
+
+  fr.onload = (e) => {
+    var contents = processExcel(e.target.result);
+    console.log(contents);
+    // update local state
+    form_data.csv.data = contents;
+    form_data.csv.name = filename;
+
+    // update chrome storage
+    chrome.storage.local.set({
+      csv: {
+        name: filename,
+        data: contents,
+      },
+    });
+
+    DOMChangesForFile(true);
   };
-  fr.readAsText(e.target.files[0]);
+
+  fr.readAsBinaryString(e.target.files[0]);
+};
+
+const handleFileRemoval = (e) => {
+  e.preventDefault();
+  // update local state
+  form_data.csv.data = [];
+  form_data.csv.name = "";
+
+  // update chrome storage
+  chrome.storage.local.set({
+    csv: null,
+  });
+
+  DOMChangesForFile(false);
+};
+
+const handleFileContainsCountryCodes = (e) => {
+  e.preventDefault();
+  const { name } = e.target;
+  // set local state
+  form_data[name] = e.target.checked;
+  // update data in chrome storage
+  chrome.storage.local.set({ [name]: e.target.checked });
+
+  csv_country_codes.disabled = e.target.checked;
 };
 
 const handleSubmit = (e) => {
@@ -279,6 +379,8 @@ const handleSubmit = (e) => {
         randomDelay: form_data.randomDelay,
         numberInputType: form_data.numberInputType,
         numbersViaCSV: form_data.numbersViaCSV,
+        csv: form_data.csv,
+        csvContainsCodes: form_data.csvContainsCodes,
       });
     }
   );
@@ -311,3 +413,9 @@ number_input_types.forEach((cur) =>
 );
 
 csv_input.addEventListener("change", handleFileInput);
+
+removeFileButton.addEventListener("click", handleFileRemoval);
+
+number_column.addEventListener("change", handleNumberDropdownChange);
+
+csv_contains_codes.addEventListener("change", handleFileContainsCountryCodes);
