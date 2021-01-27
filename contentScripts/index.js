@@ -6,6 +6,38 @@ const $id = document.getElementById.bind(document);
 // HELPER FUNCTION - delays the execution by given miliseconds
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// waits for an element in the DOM before calling the function
+const waitForEl = () => {
+  let tries = 0;
+  const maxTries = 5000;
+
+  const wait = () => {
+    try {
+      const el = $id("app").children[0].querySelector("div").children[3];
+      if (el) {
+        setObserver();
+      } else {
+        if (tries < maxTries) {
+          tries++;
+          setTimeout(() => {
+            wait();
+          }, 100);
+        }
+      }
+    } catch (e) {
+      if (tries < maxTries) {
+        tries++;
+        setTimeout(() => {
+          wait();
+        }, 100);
+      }
+    }
+  };
+  wait();
+};
+
+waitForEl();
+
 // listens for the message from popup
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "send_message") {
@@ -89,3 +121,92 @@ async function waitFor(DOMQuery) {
 function generateRandomNumber(min, max) {
   return Math.random() * (max - min) + min;
 }
+
+const setObserver = () => {
+  // observer
+  const chatScreenChangeObserver = new MutationObserver(
+    (mutations, observer) => {
+      groupChatConatactsDownload();
+    }
+  );
+
+  chatScreenChangeObserver.observe(
+    $id("app").children[0].querySelector("div").children[3],
+    {
+      childList: true,
+    }
+  );
+};
+
+const groupChatConatactsDownload = () => {
+  const headerEl = $id("app")
+    .children[0].querySelector("div")
+    .children[3].querySelector("header");
+
+  const groupDetailsContainer = headerEl.children[1];
+  const title = groupDetailsContainer.children[0].innerText;
+  const members = groupDetailsContainer.children[1].innerText;
+  const memberss = groupDetailsContainer.children[1].children[0].title;
+
+  const isAGroupChat =
+    (members.startsWith("click here") && members.includes("group")) ||
+    members.includes(",");
+
+  // only if the chat is of a group, add group download button
+  if (isAGroupChat) {
+    addGroupDownloadButton();
+  }
+
+  function addGroupDownloadButton() {
+    const buttonId = "w_download_contacts_button";
+
+    const isButtonPresent = headerEl.querySelector(`#${buttonId}`);
+
+    if (!isButtonPresent) {
+      const downloadButton = document.createElement("button");
+      downloadButton.innerText = "Get Contacts";
+      downloadButton.id = buttonId;
+      downloadButton.title = "Download group contacts";
+      downloadButton.type = "button";
+      downloadButton.addEventListener("click", handleGroupContactsDownload);
+      headerEl.insertBefore(downloadButton, headerEl.children[2]);
+    }
+  }
+
+  function handleGroupContactsDownload(e) {
+    e.preventDefault();
+    const waitForContacts = () => {
+      // console.log("waiting");
+      if (groupDetailsContainer.children[1].innerText.includes(",")) {
+        // console.log(groupDetailsContainer.children[1].innerText);
+        downloadAsCSV(
+          groupDetailsContainer.children[1].innerText,
+          `${title}.csv`
+        );
+      } else {
+        setTimeout(waitForContacts, 200);
+      }
+    };
+
+    // downloads the members as CSV
+    const downloadAsCSV = (members, filename) => {
+      let csvFormat = members.replace(/ /g, "");
+      csvFormat = csvFormat.replace(",You", "");
+      csvFormat = csvFormat.replace(/,/g, "\n");
+      const contacts = `Contacts\n${csvFormat}`;
+
+      const blob = new Blob([contacts], { type: "text/csv;charset=utf-8;" });
+
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    waitForContacts();
+  }
+};

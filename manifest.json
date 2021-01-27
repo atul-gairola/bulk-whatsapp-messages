@@ -21,7 +21,8 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["contentScripts/index.js"]
+      "js": ["contentScripts/index.js"],
+      "css": ["pageCss/styles.css"]
     }
   ],
   "permissions": ["storage", "tabs"],

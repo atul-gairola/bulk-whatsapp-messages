@@ -1,0 +1,12 @@
+button#w_download_contacts_button {
+  padding: 10px 20px;
+  color: #fff;
+  background: #25d366;
+  border-radius: 5px;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+button#w_download_contacts_button:hover {
+  opacity: 0.8;
+}
