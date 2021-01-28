@@ -45,7 +45,6 @@ const form_data = {
   countryCode: "",
   randomDelay: false,
   numberInputType: "",
-  numbersViaCSV: [],
   csv: {
     name: "",
     data: [],
@@ -69,7 +68,6 @@ function onLoad() {
   setLocalState("csv");
   setLocalState("csvContainsCodes");
   setLocalState("usePersonalizedMsg");
-  // setLocalState("numbersViaCSV");
 }
 
 // sets the local state as per the chrome storage
@@ -426,7 +424,6 @@ const handleSubmit = (e) => {
         countryCode: form_data.countryCode,
         randomDelay: form_data.randomDelay,
         numberInputType: form_data.numberInputType,
-        numbersViaCSV: form_data.numbersViaCSV,
         csv: form_data.csv,
         csvContainsCodes: form_data.csvContainsCodes,
         usePersonalizedMsg: form_data.usePersonalizedMsg,

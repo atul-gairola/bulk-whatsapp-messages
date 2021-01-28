@@ -46,7 +46,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
       message.numberInputType &&
       message.numberInputType === "whatsappContacts"
     ) {
-      await sendMessage(message.message, "");
+      await sendMessage(formatMessage(message.message), "");
       return;
     }
 
@@ -71,18 +71,20 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
           await addDelay();
         }
       }
+      return;
     }
 
     // message to manual input numbers
     if (message.numbers.length !== 0) {
       for (const number of message.numbers) {
         const numberWithCountryCode = message.countryCode + number;
-        await sendMessage(message.message, numberWithCountryCode);
+        await sendMessage(formatMessage(message.message), numberWithCountryCode);
         await clickSendButton();
         if (message.randomDelay) {
           await addDelay();
         }
       }
+      return;
     }
   }
 });
