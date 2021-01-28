@@ -37,6 +37,7 @@ const personalized_msg_chkbox = $id("personalized_msg_chkbox");
 const personalized_msg_container = $id("personalized_msg_container");
 const select_template_field = $id("select_template_field");
 const applyTemplate = $id("applyTemplate");
+const stop_button = $id("stop");
 
 // state for form data
 const form_data = {
@@ -60,6 +61,14 @@ const form_data = {
 // first function which runs whenever the popup opens
 // sets the initial state
 function onLoad() {
+  // check for loading
+  chrome.storage.local.get("loading", (res) => {
+    if (res.loading) {
+      addLoading();
+    } else {
+      removeLoading();
+    }
+  });
   setLocalState("message");
   setLocalState("numbers");
   setLocalState("countryCode");
@@ -113,7 +122,7 @@ const setInitialDom = (key, value) => {
       break;
     case "csv":
       DOMChangesForFile(true);
-      number_column.value = value.number_column.name;
+      if (value.number_column) number_column.value = value.number_column.name;
       break;
     case "csvContainsCodes":
       csv_contains_codes.checked = value;
@@ -127,6 +136,24 @@ const setInitialDom = (key, value) => {
 };
 
 onLoad();
+
+function removeLoading() {
+  submit_button.classList.remove("hide");
+  stop_button.classList.add("hide");
+  chrome.storage.local.set({ loading: false });
+}
+
+function addLoading() {
+  submit_button.classList.add("hide");
+  stop_button.classList.remove("hide");
+  chrome.storage.local.set({ loading: true });
+}
+
+chrome.runtime.onMessage.addListener((message, sender, response) => {
+  if (message.messages && message.messages === "sent") {
+    removeLoading();
+  }
+});
 
 const handleChange = (e) => {
   const { name, value } = e.target;
@@ -372,12 +399,30 @@ const handleApplyTemplate = (e) => {
   }
 };
 
+const handleActions = (e) => {
+  e.preventDefault();
+  removeLoading();
+  chrome.tabs.query(
+    {
+      active: true,
+      currentWindow: true,
+    },
+    (tabs) =>
+      chrome.tabs.sendMessage(tabs[0].id, {
+        from: "home_popup",
+        subject: "action",
+        type: e.target.id,
+      })
+  );
+};
+
 const handleSubmit = (e) => {
   e.preventDefault();
 
   // validation
   if (form_data.numberInputType === "") {
     addError("Please select a number input type");
+    return;
   }
   if (form_data.numberInputType === "manually") {
     if (form_data.countryCode === "") {
@@ -399,6 +444,31 @@ const handleSubmit = (e) => {
       input_container.classList.remove("error_input");
     }
   }
+  if (form_data.numberInputType === "csv") {
+    if (form_data.csv.data.length === 0 || form_data.csv.name === "") {
+      addError("Please select a file");
+      input_container.classList.add("error_input");
+      return;
+    } else {
+      input_container.classList.remove("error_input");
+    }
+    if (form_data.countryCode === "" && !form_data.csvContainsCodes) {
+      addError(
+        "Please select a country code or check the box if the numbers already contain country codes"
+      );
+      input_container.classList.add("error_input");
+      return;
+    } else {
+      input_container.classList.remove("error_input");
+    }
+    if (form_data.csv.number_column.name === "") {
+      addError("Please select the column name containing numbers");
+      input_container.classList.add("error_input");
+      return;
+    } else {
+      input_container.classList.remove("error_input");
+    }
+  }
   if (form_data.message === "") {
     addError("Your message is empty");
     message_input.classList.add("error_input");
@@ -409,6 +479,9 @@ const handleSubmit = (e) => {
 
   // remove all previous errors if none found
   removeError();
+
+  // add loading
+  addLoading();
 
   chrome.tabs.query(
     {
@@ -472,3 +545,5 @@ personalized_msg_chkbox.addEventListener(
 );
 
 applyTemplate.addEventListener("click", handleApplyTemplate);
+
+stop_button.addEventListener("click", handleActions);

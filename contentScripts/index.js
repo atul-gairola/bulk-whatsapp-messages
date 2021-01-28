@@ -38,9 +38,14 @@ const waitForEl = () => {
 
 waitForEl();
 
+// state used for stopping the sending of messages
+let stop = false;
+
 // listens for the message from popup
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "send_message") {
+    // update state to false
+    stop = false;
     // send messages through user saved contacts
     if (
       message.numberInputType &&
@@ -59,6 +64,10 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
       const { number_column, data } = message.csv;
       console.log(number_column, data);
       for (let i = 1; i < data.length; i++) {
+        // check if stop action was taken
+        if (stop) {
+          return;
+        }
         const numberWithCountryCode = message.csvContainsCodes
           ? formatNumber(data[i][number_column.number])
           : message.countryCode + formatNumber(data[i][number_column.number]);
@@ -71,21 +80,44 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
           await addDelay();
         }
       }
+      // set loading as false
+      chrome.storage.local.set({ loading: false });
+      chrome.runtime.sendMessage({ messages: "sent" });
+      stop = false;
       return;
     }
 
     // message to manual input numbers
     if (message.numbers.length !== 0) {
       for (const number of message.numbers) {
+        // check if stop action was taken
+        if (stop) {
+          return;
+        }
         const numberWithCountryCode = message.countryCode + number;
-        await sendMessage(formatMessage(message.message), numberWithCountryCode);
+        await sendMessage(
+          formatMessage(message.message),
+          numberWithCountryCode
+        );
         await clickSendButton();
         if (message.randomDelay) {
           await addDelay();
         }
       }
+      // set loading as false
+      chrome.storage.local.set({ loading: false });
+      chrome.runtime.sendMessage({ messages: "sent" });
+      stop = false;
       return;
     }
+  }
+});
+
+// listens for action messages from popup
+chrome.runtime.onMessage.addListener((message, sender, response) => {
+  if (message.from === "home_popup" && message.subject === "action") {
+    console.log(message.type);
+    if (message.type === "stop") stop = true;
   }
 });
 
@@ -112,19 +144,20 @@ const replaceTemplateWithValue = (template, dataArr, rowIndex) => {
   return finalStr;
 };
 
-const formatMessage = (msg) => {
+
+function formatMessage(msg) {
   return msg.replace(/\n/g, "%0a");
-};
+}
 
-const formatNumber = (numStr) => {
+function formatNumber(numStr) {
   return numStr.replace(/ /g, "").replace(/\+/g, "").replace(/-/g, "");
-};
+}
 
-const addDelay = async () => {
+async function addDelay() {
   const randomDelayTime = Math.floor(generateRandomNumber(2, 5) * 1000);
   // console.log("Delay of : ", randomDelayTime);
   await sleep(randomDelayTime);
-};
+}
 
 async function sendMessage(msg, number) {
   return new Promise((resolve, reject) => {
@@ -169,7 +202,7 @@ function generateRandomNumber(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-const setObserver = () => {
+function setObserver() {
   // observer
   const chatScreenChangeObserver = new MutationObserver(
     (mutations, observer) => {
@@ -183,9 +216,9 @@ const setObserver = () => {
       childList: true,
     }
   );
-};
+}
 
-const groupChatConatactsDownload = () => {
+function groupChatConatactsDownload() {
   try {
     const headerEl = $id("app")
       .children[0].querySelector("div")
@@ -267,4 +300,4 @@ const groupChatConatactsDownload = () => {
       }
     }
   } catch (e) {}
-};
+}
