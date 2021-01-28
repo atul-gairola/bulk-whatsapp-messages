@@ -33,6 +33,10 @@ const removeFileButton = $(".removeFile");
 const fileSelected = $(".fileSelected");
 const csv_contains_codes = $id("csv_contains_codes");
 const csv_country_codes = $id("csv_country_codes");
+const personalized_msg_chkbox = $id("personalized_msg_chkbox");
+const personalized_msg_container = $id("personalized_msg_container");
+const select_template_field = $id("select_template_field");
+const applyTemplate = $id("applyTemplate");
 
 // state for form data
 const form_data = {
@@ -51,6 +55,7 @@ const form_data = {
     },
   },
   csvContainsCodes: false,
+  usePersonalizedMsg: false,
 };
 
 // first function which runs whenever the popup opens
@@ -63,6 +68,7 @@ function onLoad() {
   setLocalState("numberInputType");
   setLocalState("csv");
   setLocalState("csvContainsCodes");
+  setLocalState("usePersonalizedMsg");
   // setLocalState("numbersViaCSV");
 }
 
@@ -114,6 +120,11 @@ const setInitialDom = (key, value) => {
     case "csvContainsCodes":
       csv_contains_codes.checked = value;
       csv_country_codes.disabled = value;
+      break;
+    case "usePersonalizedMsg":
+      personalized_msg_container.classList.toggle("hide", !value);
+      personalized_msg_chkbox.checked = value;
+      break;
   }
 };
 
@@ -243,22 +254,34 @@ const DOMChangesForFile = (isFileSelected) => {
     fileSelected.classList.remove("hide");
     // create options
     form_data.csv.data[0].forEach((cur) => {
-      const option = document.createElement("option");
-      option.value = cur;
-      option.innerText = cur;
-      number_column.appendChild(option);
+      const option1 = document.createElement("option");
+      const option2 = document.createElement("option");
+      option1.value = cur;
+      option1.innerText = cur;
+      option2.value = cur;
+      option2.innerText = cur;
+
+      number_column.appendChild(option1);
+      // also add to the template drpdown
+      select_template_field.appendChild(option2);
     });
   } else {
     add_csv_button.classList.remove("hide");
     fileNameTag.classList.add("hide");
     removeFileButton.classList.add("hide");
     fileSelected.classList.add("hide");
+    [...number_column.querySelectorAll("option")].forEach((cur, i) =>
+      i !== 0 ? cur.remove() : null
+    );
+    [...select_template_field.querySelectorAll("option")].forEach((cur, i) =>
+      i !== 0 ? cur.remove() : null
+    );
   }
 };
 
 const handleFileInput = (e) => {
   const { name: filename } = e.target.files[0];
-
+  console.log(form_data);
   const fr = new FileReader();
   function processExcel(data) {
     var workbook = XLSX.read(data, {
@@ -303,9 +326,16 @@ const handleFileInput = (e) => {
 
 const handleFileRemoval = (e) => {
   e.preventDefault();
+
+  csv_input.value = "";
+
   // update local state
   form_data.csv.data = [];
   form_data.csv.name = "";
+  form_data.csv.number_column = {
+    name: "",
+    number: "",
+  };
 
   // update chrome storage
   chrome.storage.local.set({
@@ -324,6 +354,24 @@ const handleFileContainsCountryCodes = (e) => {
   chrome.storage.local.set({ [name]: e.target.checked });
 
   csv_country_codes.disabled = e.target.checked;
+};
+
+const handlePersonalizedMsgChckBox = (e) => {
+  const { name, checked } = e.target;
+  // set local state
+  form_data[name] = checked;
+  // set chrome storage
+  chrome.storage.local.set({ [name]: checked });
+
+  personalized_msg_container.classList.toggle("hide", !checked);
+};
+
+const handleApplyTemplate = (e) => {
+  e.preventDefault();
+  console.log(select_template_field.value);
+  if (select_template_field.value !== "") {
+    message_input.value = `${message_input.value}{{${select_template_field.value}}}`;
+  }
 };
 
 const handleSubmit = (e) => {
@@ -381,6 +429,7 @@ const handleSubmit = (e) => {
         numbersViaCSV: form_data.numbersViaCSV,
         csv: form_data.csv,
         csvContainsCodes: form_data.csvContainsCodes,
+        usePersonalizedMsg: form_data.usePersonalizedMsg,
       });
     }
   );
@@ -419,3 +468,10 @@ removeFileButton.addEventListener("click", handleFileRemoval);
 number_column.addEventListener("change", handleNumberDropdownChange);
 
 csv_contains_codes.addEventListener("change", handleFileContainsCountryCodes);
+
+personalized_msg_chkbox.addEventListener(
+  "change",
+  handlePersonalizedMsgChckBox
+);
+
+applyTemplate.addEventListener("click", handleApplyTemplate);

@@ -627,9 +627,7 @@
             id="csv_contains_codes"
             name="csvContainsCodes"
           />
-          <label for="csvContainsCodes"
-            >File contains country codes</label
-          >
+          <label for="csvContainsCodes">File contains country codes</label>
         </div>
         <br />
         <label for="csv">Add a CSV file</label>
@@ -650,24 +648,30 @@
         </div>
         <p id="total_numbers_csv" class="hide">Total numbers:</p>
 
-        <div class="fileSelected hide" >
-           <p>Select numbers from </p>
-           <select name="number_column" id="number_column">
+        <div class="fileSelected hide">
+          <p>Select numbers from</p>
+          <select name="number_column" id="number_column">
             <option value="" selected disabled hidden>Columns</option>
-           </select>
+          </select>
 
-           <!-- <div>
-            <div class="checkbox-container">
-              <input
-                type="checkbox"
-                id="contains_csv_codes"
-                name="csvContainsCountryCodes"
-              />
-              <label for="csvContainsCountryCodes"
-                >Use a template</label
-              >
-            </div>
-           </div> -->
+          <div class="checkbox-container">
+            <input
+              type="checkbox"
+              id="personalized_msg_chkbox"
+              name="usePersonalizedMsg"
+            />
+            <label for="usePersonalizedMsg"
+              >Send personalized messages</label
+            >
+          </div>
+          <div id="personalized_msg_container" class="hide">
+            <p>Select the column to add the template and click apply</p>
+            <label for="">Select column to add to template</label>
+            <select name="selectTemplateField" id="select_template_field">
+              <option value="" selected disabled hidden>Columns</option>
+            </select>
+            <button id="applyTemplate" >Apply</button>
+          </div>
         </div>
       </div>
       <div class="textbox_label_container">

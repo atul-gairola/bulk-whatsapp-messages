@@ -62,16 +62,19 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
         const numberWithCountryCode = message.csvContainsCodes
           ? formatNumber(data[i][number_column.number])
           : message.countryCode + formatNumber(data[i][number_column.number]);
-        // console.log(numberWithCountryCode);
-        await sendMessage(message.message, numberWithCountryCode);
+        const finalMessage = message.usePersonalizedMsg
+          ? formatMessage(replaceTemplateWithValue(message.message, data, i))
+          : formatMessage(message.message);
+        await sendMessage(finalMessage, numberWithCountryCode);
         await clickSendButton();
         if (message.randomDelay) {
           await addDelay();
         }
       }
     }
+
+    // message to manual input numbers
     if (message.numbers.length !== 0) {
-      // message to manual input numbers
       for (const number of message.numbers) {
         const numberWithCountryCode = message.countryCode + number;
         await sendMessage(message.message, numberWithCountryCode);
@@ -83,6 +86,33 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
     }
   }
 });
+
+const replaceTemplateWithValue = (template, dataArr, rowIndex) => {
+  let tempStr = template.replace(/}}/g, "}").replace(/{{/g, "{");
+  const tempArr = Array.from(tempStr);
+  const openIndexes = [],
+    closeIndexes = [];
+  tempArr.forEach((cur, i) => {
+    if (cur === "{") openIndexes.push(i);
+    if (cur === "}") closeIndexes.push(i);
+  });
+  let finalStr = tempStr;
+  if (openIndexes.length > 0) {
+    openIndexes.forEach((cur, i) => {
+      const columnName = tempStr.slice(cur + 1, closeIndexes[i]);
+      const indexOfColumn = dataArr[0].indexOf(columnName);
+      if (indexOfColumn !== -1) {
+        const value = dataArr[rowIndex][indexOfColumn];
+        finalStr = finalStr.replace(`{${columnName}}`, value);
+      }
+    });
+  }
+  return finalStr;
+};
+
+const formatMessage = (msg) => {
+  return msg.replace(/\n/g, "%0a");
+};
 
 const formatNumber = (numStr) => {
   return numStr.replace(/ /g, "").replace(/\+/g, "").replace(/-/g, "");
