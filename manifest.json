@@ -1,7 +1,7 @@
 {
   "name": "Bulk Whatsapp Messages",
   "version": "2.0",
-  "description": "_MSG_DESCRIPTION",
+  "description": "Send bulk messages, download group contacts, personalized messaging and much more.",
   "author": "StartupTalky",
   "manifest_version": 2,
   "background": {
