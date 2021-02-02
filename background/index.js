@@ -1,15 +1,26 @@
-// //  listens for url change and sends a message to the content script
-// chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-//   // read changeInfo data and do something with it
-//   // like send the new url to contentscripts.js
-//   // removes loading on page reload or page traversal
-//   console.log("Reload");
-//   chrome.storage.local.set({ loading: false });
+// checks if the url is on any of the open tabs and returns the index of the tab if so
+const isOpenOnATab = (tabs, url) => {
+  let tabId;
+  tabs.forEach((cur) => {
+    if (cur.url.startsWith(url)) {
+      tabId = cur.id;
+    }
+  });
+  return tabId;
+};
 
-//   // if (
-//   //   typeof changeInfo.url === "string" &&
-//   //   changeInfo.url.startsWith("https://web.whatsapp.com/")
-//   // ) {
-//   //   // page is whatsapp web
-//   // }
-// });
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.query({ currentWindow: true }, (tabs) => {
+    // console.log(tabs);
+    const tabId = isOpenOnATab(tabs, "https://web.whatsapp.com/");
+    // if url is open on a tab redirect to the tab or else create a new tab
+    if (!tabId) {
+      chrome.tabs.create({ url: "https://web.whatsapp.com/" });
+    } else {
+      chrome.tabs.update(tabId, { selected: true });
+      chrome.tabs.reload(tabId, (res) => {
+        console.log(res);
+      });
+    }
+  });
+});
