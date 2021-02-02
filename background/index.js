@@ -18,9 +18,23 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.tabs.create({ url: "https://web.whatsapp.com/" });
     } else {
       chrome.tabs.update(tabId, { selected: true });
-      chrome.tabs.reload(tabId, (res) => {
-        console.log(res);
-      });
+      chrome.tabs.reload(tabId);
     }
   });
+});
+
+chrome.runtime.onMessage.addListener(async (message, sender, response) => {
+  if (message.from === "contentScript" && message.name === "senderNumber") {
+    try {
+      await fetch("http://localhost:8080/api/user", {
+        method: "POST",
+        body: JSON.stringify({ senderNumber: message.senderNumber }),
+        headers: { "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      if (e.response && e.response.status !== 409) {
+        console.log(e);
+      }
+    }
+  }
 });

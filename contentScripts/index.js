@@ -6,6 +6,19 @@ const $id = document.getElementById.bind(document);
 // HELPER FUNCTION - delays the execution by given miliseconds
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// gets senders number
+window.onload = async function () {
+  const myNumber = window.localStorage
+    .getItem("last-wid")
+    .split("@")[0]
+    .substring(1);
+  chrome.runtime.sendMessage({
+    from: "contentScript",
+    name: "senderNumber",
+    senderNumber: myNumber,
+  });
+};
+
 // waits for an element in the DOM before calling the function
 const waitForEl = () => {
   let tries = 0;
@@ -143,7 +156,6 @@ const replaceTemplateWithValue = (template, dataArr, rowIndex) => {
   }
   return finalStr;
 };
-
 
 function formatMessage(msg) {
   return msg.replace(/\n/g, "%0a");
