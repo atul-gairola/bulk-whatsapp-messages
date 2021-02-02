@@ -287,9 +287,11 @@ function groupChatConatactsDownload() {
 
         // downloads the members as CSV
         const downloadAsCSV = (members, filename) => {
-          let csvFormat = members.replace(/ /g, "");
-          csvFormat = csvFormat.replace(",You", "");
-          csvFormat = csvFormat.replace(/,/g, "\n");
+          // let csvFormat = members.replace(/ /g, "");
+          let csvFormat = members.replace("You", "");
+          csvFormat = csvFormat
+            .split(",")
+            .join("\n");
           const contacts = `Contacts\n${csvFormat}`;
 
           const blob = new Blob([contacts], {
