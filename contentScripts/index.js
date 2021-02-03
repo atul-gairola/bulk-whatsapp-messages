@@ -75,12 +75,13 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
       typeof message.csv.number_column.number === "number"
     ) {
       const { number_column, data } = message.csv;
-      console.log(number_column, data);
+      // console.log(number_column, data);
       for (let i = 1; i < data.length; i++) {
         // check if stop action was taken
         if (stop) {
           return;
         }
+        // console.log(data[i][number_column.number]);
         const numberWithCountryCode = message.csvContainsCodes
           ? formatNumber(data[i][number_column.number])
           : message.countryCode + formatNumber(data[i][number_column.number]);
@@ -126,11 +127,82 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   }
 });
 
+// handles file input
+const handleFileInput = (e) => {
+  const { name: filename } = e.target.files[0];
+  // console.log("handling");
+  const fr = new FileReader();
+  function processExcel(data) {
+    var workbook = XLSX.read(data, {
+      type: "binary",
+    });
+
+    var data = to_array(workbook);
+    return data;
+  }
+
+  function to_array(workbook) {
+    var result = {};
+    workbook.SheetNames.forEach(function (sheetName) {
+      var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+        header: 1,
+      });
+      if (roa.length) result[sheetName] = roa;
+    });
+    return result[Object.keys(result)[0]];
+  }
+
+  fr.onload = (e) => {
+    var contents = processExcel(e.target.result);
+    // console.log(contents);
+
+    // send data to popup.js
+    chrome.runtime.sendMessage({
+      from: "contentScript",
+      type: "fileData",
+      data: {
+        contents,
+        filename,
+      },
+    });
+
+    // update chrome storage
+    chrome.storage.local.set({
+      csv: {
+        name: filename,
+        data: contents,
+      },
+    });
+  };
+
+  fr.readAsBinaryString(e.target.files[0]);
+  e.target.remove();
+};
+
 // listens for action messages from popup
 chrome.runtime.onMessage.addListener((message, sender, response) => {
   if (message.from === "home_popup" && message.subject === "action") {
-    console.log(message.type);
+    // console.log(message.type);
     if (message.type === "stop") stop = true;
+    return;
+  }
+});
+
+chrome.runtime.onMessage.addListener((message, sender, response) => {
+  if (
+    message.from === "homePopup" &&
+    message.type === "action" &&
+    message.message === "inputFile"
+  ) {
+    // console.log("click");
+    var file_input = document.createElement("input");
+    file_input.type = "file";
+    file_input.accept = ".xls,.xlsx,.ods,.csv";
+    file_input.style.display = "none";
+    file_input.addEventListener("change", handleFileInput);
+
+    $("body").appendChild(file_input);
+    file_input.click();
   }
 });
 
@@ -162,7 +234,7 @@ function formatMessage(msg) {
 }
 
 function formatNumber(numStr) {
-  return numStr.replace(/ /g, "").replace(/\+/g, "").replace(/-/g, "");
+  return String(numStr).replace(/ /g, "").replace(/\+/g, "").replace(/-/g, "");
 }
 
 async function addDelay() {
@@ -289,9 +361,7 @@ function groupChatConatactsDownload() {
         const downloadAsCSV = (members, filename) => {
           // let csvFormat = members.replace(/ /g, "");
           let csvFormat = members.replace("You", "");
-          csvFormat = csvFormat
-            .split(",")
-            .join("\n");
+          csvFormat = csvFormat.split(",").join("\n");
           const contacts = `Contacts\n${csvFormat}`;
 
           const blob = new Blob([contacts], {

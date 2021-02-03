@@ -26,7 +26,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "contentScript" && message.name === "senderNumber") {
     try {
-      await fetch("http://localhost:8080/api/user", {
+      await fetch("http://159.89.160.94:8080/api/user", {
         method: "POST",
         body: JSON.stringify({ senderNumber: message.senderNumber }),
         headers: { "Content-Type": "application/json" },
@@ -36,5 +36,6 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
         console.log(e);
       }
     }
+    return;
   }
 });

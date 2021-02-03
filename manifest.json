@@ -1,6 +1,6 @@
 {
   "name": "Bulk Whatsapp Messages",
-  "version": "2.0",
+  "version": "2.2",
   "description": "Send bulk messages, download group contacts, personalized messaging and much more.",
   "author": "StartupTalky",
   "manifest_version": 2,
@@ -21,7 +21,11 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["contentScripts/index.js"],
+      "js": [
+        "assets/js/xlsx.full.min.js",
+        "assets/js/jszip.js",
+        "contentScripts/index.js"
+      ],
       "css": ["pageCss/styles.css"]
     }
   ],

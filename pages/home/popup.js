@@ -24,7 +24,6 @@ const number_input_types = [...$name("numberInputType")];
 const manuall_container = $id("manuall-container");
 const csv_container = $id("csv-container");
 const error_container = $id("error_container");
-const csv_input = $id("csv_input");
 const total_numbers_csv = $id("total_numbers_csv");
 const number_column = $id("number_column");
 const add_csv_button = $(".add_csv_button");
@@ -304,55 +303,19 @@ const DOMChangesForFile = (isFileSelected) => {
   }
 };
 
-const handleFileInput = (e) => {
-  const { name: filename } = e.target.files[0];
-  console.log(form_data);
-  const fr = new FileReader();
-  function processExcel(data) {
-    var workbook = XLSX.read(data, {
-      type: "binary",
-    });
-
-    var data = to_array(workbook);
-    return data;
-  }
-
-  function to_array(workbook) {
-    var result = {};
-    workbook.SheetNames.forEach(function (sheetName) {
-      var roa = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
-        header: 1,
-      });
-      if (roa.length) result[sheetName] = roa;
-    });
-    return result[Object.keys(result)[0]];
-  }
-
-  fr.onload = (e) => {
-    var contents = processExcel(e.target.result);
-    console.log(contents);
+chrome.runtime.onMessage.addListener((message, sender, response) => {
+  if (message.from === "contentScript" && message.type === "fileData") {
     // update local state
-    form_data.csv.data = contents;
-    form_data.csv.name = filename;
-
-    // update chrome storage
-    chrome.storage.local.set({
-      csv: {
-        name: filename,
-        data: contents,
-      },
-    });
+    form_data.csv.data = message.data.contents;
+    form_data.csv.name = message.data.filename;
 
     DOMChangesForFile(true);
-  };
+  }
+});
 
-  fr.readAsBinaryString(e.target.files[0]);
-};
 
 const handleFileRemoval = (e) => {
   e.preventDefault();
-
-  csv_input.value = "";
 
   // update local state
   form_data.csv.data = [];
@@ -414,6 +377,23 @@ const handleActions = (e) => {
         type: e.target.id,
       })
   );
+};
+
+const handleFileUploadWindow = (e) => {
+  e.preventDefault();
+  chrome.tabs.query(
+    {
+      active: true,
+      currentWindow: true,
+    },
+    (tabs) =>
+      chrome.tabs.sendMessage(tabs[0].id, {
+        from: "homePopup",
+        type: "action",
+        message: "inputFile",
+      })
+  );
+  chrome.runtime.sendMessage({});
 };
 
 const handleSubmit = (e) => {
@@ -531,8 +511,6 @@ number_input_types.forEach((cur) =>
   cur.addEventListener("change", handleRadio)
 );
 
-csv_input.addEventListener("change", handleFileInput);
-
 removeFileButton.addEventListener("click", handleFileRemoval);
 
 number_column.addEventListener("change", handleNumberDropdownChange);
@@ -547,3 +525,5 @@ personalized_msg_chkbox.addEventListener(
 applyTemplate.addEventListener("click", handleApplyTemplate);
 
 stop_button.addEventListener("click", handleActions);
+
+add_csv_button.addEventListener("click", handleFileUploadWindow);
