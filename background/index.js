@@ -9,6 +9,7 @@ const isOpenOnATab = (tabs, url) => {
   return tabId;
 };
 
+// on Intstallation
 chrome.runtime.onInstalled.addListener(() => {
   chrome.tabs.query({ currentWindow: true }, (tabs) => {
     // console.log(tabs);
@@ -22,6 +23,11 @@ chrome.runtime.onInstalled.addListener(() => {
     }
   });
 });
+
+// when uninstalled
+chrome.runtime.setUninstallURL(
+  "https://docs.google.com/forms/d/e/1FAIpQLSe0cxKS4OLFLRLK3jPHjJDiFM436krB78XP6hkGfJZfEoaIvQ/viewform"
+);
 
 chrome.runtime.onMessage.addListener(async (message, sender, response) => {
   if (message.from === "contentScript" && message.name === "senderNumber") {
