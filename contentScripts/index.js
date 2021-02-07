@@ -20,9 +20,8 @@ window.onload = async function () {
 };
 
 // waits for an element in the DOM before calling the function
-const waitForEl = () => {
+const waitForEl = (maxTries) => {
   let tries = 0;
-  const maxTries = 5000;
 
   const wait = () => {
     try {
@@ -49,7 +48,7 @@ const waitForEl = () => {
   wait();
 };
 
-waitForEl();
+waitForEl(5000);
 
 // state used for stopping the sending of messages
 let stop = false;
@@ -244,29 +243,39 @@ async function addDelay() {
 }
 
 async function sendMessage(msg, number) {
-  return new Promise((resolve, reject) => {
-    const bulkWhatsappLink = $id("blkwhattsapplink");
-    if (bulkWhatsappLink) {
-      bulkWhatsappLink.setAttribute(
-        "href",
-        `https://wa.me/${number}?text=${msg}`
-      );
-    } else {
-      const spanHtml = `<a href="https://wa.me/${number}?text=${msg}" id= "blkwhattsapplink"></a>`;
-      const spans = $$("#app .app-wrapper-web span");
-      spans[4].innerHTML = spanHtml;
-    }
-
-    setTimeout(() => {
-      document.getElementById("blkwhattsapplink").click();
-      resolve();
-    }, 1000);
-  });
+  try {
+    sleep(1000);
+    return new Promise((resolve, reject) => {
+      const bulkWhatsappLink = $id("blkwhattsapplink");
+      let delay = 1000;
+      if (bulkWhatsappLink) {
+        bulkWhatsappLink.setAttribute(
+          "href",
+          `https://wa.me/${number}?text=${msg}`
+        );
+      } else {
+        const spanHtml = `<a href="https://wa.me/${number}?text=${msg}" id= "blkwhattsapplink"></a>`;
+        const spans = $$("#app .app-wrapper-web span");
+        spans[4].innerHTML = spanHtml;
+      }
+      // waitForEl("[data-icon=send]", 200);
+      setTimeout(() => {
+        document.getElementById("blkwhattsapplink").click();
+        resolve();
+      }, delay);
+    });
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 async function clickSendButton() {
-  await waitFor("[data-icon=send]");
+  const sent = await waitFor("[data-icon=send]");
+  if (!sent) {
+    return;
+  }
   if ($("[data-icon=send]")) {
+    // console.log("button clicked");
     $("[data-icon=send]").click();
   }
 }
@@ -274,9 +283,17 @@ async function clickSendButton() {
 // helper function keeps waiting recursively for the given element query until found on the DOM
 async function waitFor(DOMQuery) {
   if (!$(DOMQuery)) {
-    setTimeout(async function () {
-      await waitFor(DOMQuery);
-    }, 500);
+    // console.log("waiting");
+    if ($('[data-animate-modal-popup="true"]')) {
+      if (
+        $(
+          '[data-animate-modal-popup="true"]'
+        ).children[0].children[0].innerText.includes("invalid")
+      )
+        return false;
+    }
+    await sleep(500);
+    await waitFor(DOMQuery);
   }
   return;
 }
