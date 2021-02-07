@@ -129,7 +129,20 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
 // handles file input
 const handleFileInput = (e) => {
   const { name: filename } = e.target.files[0];
-  // console.log("handling");
+  console.log(filename.match(/\.([^\.]+)$/)[1]);
+  switch (filename.match(/\.([^\.]+)$/)[1]) {
+    case "xlsx":
+    case "ods":
+    case "csv":
+    case "xls":
+      break;
+    default:
+      alert(
+        "File type not allowed.\nAllowed file types: .xls, .xlsx, .ods, .csv"
+      );
+      e.target.value = "";
+      return;
+  }
   const fr = new FileReader();
   function processExcel(data) {
     var workbook = XLSX.read(data, {
