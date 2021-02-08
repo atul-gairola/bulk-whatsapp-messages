@@ -63,6 +63,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
       message.numberInputType &&
       message.numberInputType === "whatsappContacts"
     ) {
+      // console.log("sending message")
       await sendMessage(formatMessage(message.message), "");
       return;
     }
@@ -129,7 +130,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, response) => {
 // handles file input
 const handleFileInput = (e) => {
   const { name: filename } = e.target.files[0];
-  console.log(filename.match(/\.([^\.]+)$/)[1]);
+  // console.log(filename.match(/\.([^\.]+)$/)[1]);
   switch (filename.match(/\.([^\.]+)$/)[1]) {
     case "xlsx":
     case "ods":
@@ -257,7 +258,7 @@ async function addDelay() {
 
 async function sendMessage(msg, number) {
   try {
-    sleep(1000);
+    // sleep(1000);
     return new Promise((resolve, reject) => {
       const bulkWhatsappLink = $id("blkwhattsapplink");
       let delay = 1000;
@@ -285,6 +286,7 @@ async function sendMessage(msg, number) {
 async function clickSendButton() {
   const sent = await waitFor("[data-icon=send]");
   if (!sent) {
+    // console.log("Message not sending");
     return;
   }
   if ($("[data-icon=send]")) {
@@ -308,7 +310,7 @@ async function waitFor(DOMQuery) {
     await sleep(500);
     await waitFor(DOMQuery);
   }
-  return;
+  return true;
 }
 
 // helper function returns random numbers b/w 2 given numbers
