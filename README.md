@@ -21,6 +21,6 @@ This is a chromium extension which helps you send bulk whatsapp messages to mult
 
 ![alt text](https://github.com/atul-gairola/bulk-whatsapp-messages/blob/master/ss/ss1.png?raw=true)
 
-![alt text](https://github.com/atul-gairola/bulk-whatsapp-messages/blob/master/ss/ss1.png?raw=true)
+![alt text](https://github.com/atul-gairola/bulk-whatsapp-messages/blob/master/ss/ss2.png?raw=true)
 
-![alt text](https://github.com/atul-gairola/bulk-whatsapp-messages/blob/master/ss/ss1.png?raw=true)
+![alt text](https://github.com/atul-gairola/bulk-whatsapp-messages/blob/master/ss/ss3.png?raw=true)
